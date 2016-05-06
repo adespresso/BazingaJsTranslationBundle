@@ -6,6 +6,8 @@
     <parameters>
         <parameter key="bazinga.jstranslation.translation_finder.class">Bazinga\Bundle\JsTranslationBundle\Finder\TranslationFinder</parameter>
         <parameter key="bazinga.jstranslation.translation_dumper.class">Bazinga\Bundle\JsTranslationBundle\Dumper\TranslationDumper</parameter>
+        <parameter key="bazinga.jstranslation.twig.translation_message_format_converter_extension.class">Bazinga\Bundle\JsTranslationBundle\Twig\TranslationMessageFormatConverterExtension</parameter>
+        <parameter key="bazinga.jstranslation.translation_to_icu_converter.class">Bazinga\Bundle\JsTranslationBundle\Converter\TranslationToIcuConverter</parameter>
     </parameters>
 
     <services>
@@ -21,6 +23,11 @@
             <argument></argument> <!-- default domain    -->
             <argument></argument> <!-- active locales -->
             <argument></argument> <!-- active domains -->
+        </service>
+        <service id="bazinga.jstranslation.translation_to_icu_converter" class="%bazinga.jstranslation.translation_to_icu_converter.class%" />
+        <service id="bazinga.jstranslation.twig.translation_message_format_converter_extension" class="%bazinga.jstranslation.twig.translation_message_format_converter_extension.class%">
+            <tag name="twig.extension" />
+            <argument type="service" id="bazinga.jstranslation.translation_to_icu_converter" />
         </service>
     </services>
 </container>

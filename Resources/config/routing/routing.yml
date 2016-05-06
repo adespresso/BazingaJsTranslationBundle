@@ -6,5 +6,5 @@ bazinga_jstranslation_js:
         i18n: false
         expose: true
     requirements:
-        _format: js|json
+        _format: js|json|icu.json
         domain: "[\\w]+"

@@ -106,6 +106,7 @@ class Controller
 
     public function getTranslationsAction(Request $request, $domain, $_format)
     {
+        $baseFormat = $this->getBaseFormat($_format);
         $locales = $this->getLocales($request);
 
         if (0 === count($locales)) {
@@ -175,7 +176,7 @@ class Controller
         $response = new Response(
             file_get_contents($cachePath),
             200,
-            array('Content-Type' => $request->getMimeType($_format))
+            array('Content-Type' => $request->getMimeType($baseFormat))
         );
         $response->prepare($request);
         $response->setPublic();
@@ -203,5 +204,15 @@ class Controller
         }, $locales));
 
         return $locales;
+    }
+
+    private function getBaseFormat($format)
+    {
+        if (strpos($format, '.') !== false) {
+            $chunks = explode('.', $format);
+            $format = end($chunks);
+        }
+
+        return $format;
     }
 }
