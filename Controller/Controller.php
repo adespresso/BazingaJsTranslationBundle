@@ -200,6 +200,9 @@ class Controller
             $locales = array($request->getLocale());
         }
 
+        // Always consider the fallback locale as the first one to include in the output.
+        array_unshift($locales, $this->localeFallback);
+
         $locales = array_filter($locales, function ($locale) {
             return 1 === preg_match('/^[a-z]{2}([-_]{1}[a-zA-Z]{2})?$/', $locale);
         });
