@@ -5,6 +5,7 @@ namespace Bazinga\Bundle\JsTranslationBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 
@@ -14,6 +15,8 @@ use Symfony\Component\Console\Output\Output;
 class DumpCommand extends ContainerAwareCommand
 {
     private $targetPath;
+
+    private $jsonpCallback;
 
     /**
      * {@inheritDoc}
@@ -28,6 +31,12 @@ class DumpCommand extends ContainerAwareCommand
                     InputArgument::OPTIONAL,
                     'Override the target directory to dump JS translation files in.'
                 ),
+                new InputOption(
+                    'jsonp-callback',
+                    null,
+                    InputOption::VALUE_REQUIRED,
+                    'JSONP callback expression used during dump (default is "callback").'
+                ),
             ))
             ->setDescription('Dumps all JS translation files to the filesystem');
     }
@@ -41,6 +50,8 @@ class DumpCommand extends ContainerAwareCommand
 
         $this->targetPath = $input->getArgument('target') ?:
             sprintf('%s/../web/js', $this->getContainer()->getParameter('kernel.root_dir'));
+
+        $this->jsonpCallback = $input->getOption('jsonp-callback') ?: 'callback';
     }
 
     /**
@@ -63,6 +74,8 @@ class DumpCommand extends ContainerAwareCommand
         $this
             ->getContainer()
             ->get('bazinga.jstranslation.translation_dumper')
-            ->dump($this->targetPath);
+            ->dump($this->targetPath, [
+                'jsonp_callback' => $this->jsonpCallback,
+            ]);
     }
 }

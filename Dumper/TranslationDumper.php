@@ -118,9 +118,13 @@ class TranslationDumper
      * Dump all translation files.
      *
      * @param string $target Target directory.
+     * @param array $options
      */
-    public function dump($target = 'web/js')
+    public function dump($target = 'web/js', array $options = [])
     {
+        $options      += [
+            'jsonp_callback' => 'callback',
+        ];
         $route         = $this->router->getRouteCollection()->get('bazinga_jstranslation_js');
         $requirements  = $route->getRequirements();
         $formats       = explode('|', $requirements['_format']);
@@ -132,7 +136,7 @@ class TranslationDumper
         $this->filesystem->remove($target. '/' . current($parts));
 
         $this->dumpConfig($route, $formats, $target);
-        $this->dumpTranslations($route, $formats, $target);
+        $this->dumpTranslations($route, $formats, $target, $options);
     }
 
     private function dumpConfig($route, array $formats, $target)
@@ -162,7 +166,7 @@ class TranslationDumper
         }
     }
 
-    private function dumpTranslations($route, array $formats, $target)
+    private function dumpTranslations($route, array $formats, $target, array $options)
     {
         foreach ($this->getTranslations() as $locale => $domains) {
             foreach ($domains as $domain => $translations) {
@@ -172,6 +176,7 @@ class TranslationDumper
                             $domain => $translations,
                         )),
                         'include_config' => false,
+                        'callback' => $options['jsonp_callback'],
                     ));
 
                     $file = sprintf('%s/%s',
