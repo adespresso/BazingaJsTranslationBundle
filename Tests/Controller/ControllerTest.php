@@ -71,7 +71,7 @@ JSON
 {
     "fallback": "en",
     "defaultDomain": "messages",
-    "translations": {"pt":[]}
+    "translations": {"en":{"foo":{"foo":"bar"}},"pt":[]}
 }
 
 JSON
@@ -147,6 +147,8 @@ JS
 (function (Translator) {
     Translator.fallback      = 'en';
     Translator.defaultDomain = 'messages';
+    // en
+    Translator.add("foo", "bar", "foo", "en");
     // pt
 })(Translator);
 
@@ -180,7 +182,17 @@ JSON
         $crawler  = $client->request('GET', '/translations?locales=en-randomstring/../../evil');
         $response = $client->getResponse();
 
-        $this->assertEquals(404, $response->getStatusCode());
+        // Just returning the english (default) translation.
+        $this->assertEquals(<<<JS
+(function (Translator) {
+    Translator.fallback      = 'en';
+    Translator.defaultDomain = 'messages';
+    // en
+    Translator.add("hello", "hello", "messages", "en");
+})(Translator);
+
+JS
+        , $response->getContent());
 
         // 2. let's create a random directory with a random js file
         // Fixing this issue = not creating any file here
@@ -197,7 +209,17 @@ JSON
         $crawler  = $client->request('GET', '/translations?locales=en-randomstring/../../evil');
         $response = $client->getResponse();
 
-        $this->assertEquals(404, $response->getStatusCode());
+        // Just returning the english (default) translation.
+        $this->assertEquals(<<<JS
+(function (Translator) {
+    Translator.fallback      = 'en';
+    Translator.defaultDomain = 'messages';
+    // en
+    Translator.add("hello", "hello", "messages", "en");
+})(Translator);
+
+JS
+        , $response->getContent());
     }
 
     public function testGetTranslationsWithLocaleInjection()
@@ -207,7 +229,16 @@ JSON
         $crawler  = $client->request('GET', '/translations/messages.json?locales=foo%0Auncommented%20code;');
         $response = $client->getResponse();
 
-        $this->assertEquals(404, $response->getStatusCode());
+        // Just returning the english (default) translation.
+        $this->assertEquals(<<<JSON
+{
+    "fallback": "en",
+    "defaultDomain": "messages",
+    "translations": {"en":{"messages":{"hello":"hello"}}}
+}
+
+JSON
+        , $response->getContent());
     }
 
     public function testGetTranslationsWithLowerCaseUnderscoredLocale()
@@ -221,7 +252,7 @@ JSON
 {
     "fallback": "en",
     "defaultDomain": "messages",
-    "translations": {"en_en":[]}
+    "translations": {"en":{"messages":{"hello":"hello"}},"en_en":[]}
 }
 
 JSON
@@ -239,7 +270,7 @@ JSON
 {
     "fallback": "en",
     "defaultDomain": "messages",
-    "translations": {"en-en":[]}
+    "translations": {"en":{"messages":{"hello":"hello"}},"en-en":[]}
 }
 
 JSON
@@ -257,7 +288,7 @@ JSON
 {
     "fallback": "en",
     "defaultDomain": "messages",
-    "translations": {"fr-FR":[]}
+    "translations": {"en":{"messages":{"hello":"hello"}},"fr-FR":[]}
 }
 
 JSON
@@ -275,7 +306,7 @@ JSON
 {
     "fallback": "en",
     "defaultDomain": "messages",
-    "translations": {"fr_FR":[]}
+    "translations": {"en":{"messages":{"hello":"hello"}},"fr_FR":[]}
 }
 
 JSON

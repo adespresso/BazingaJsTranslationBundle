@@ -45,8 +45,12 @@ class TranslationDumperTest extends WebTestCase
             'messages/fr.json',
             'foo/en.js',
             'foo/en.json',
+            'foo/fr.js',
+            'foo/fr.json',
             'numerics/en.js',
             'numerics/en.json',
+            'numerics/fr.js',
+            'numerics/fr.json',
         ) as $file) {
             $this->assertFileExists($this->target . '/translations/' . $file);
         }
@@ -104,6 +108,23 @@ JSON
 
 JSON
         , file_get_contents($this->target . '/translations/messages/en.json'));
+
+        $this->assertEquals(<<<JSON
+{
+    "translations": {"en":{"foo":{"foo":"bar"}}}
+}
+
+JSON
+        , file_get_contents($this->target . '/translations/foo/en.json'));
+
+        // There is no translation file for domain foo and French, the fallback is used.
+        $this->assertEquals(<<<JSON
+{
+    "translations": {"fr":{"foo":{"foo":"bar"}}}
+}
+
+JSON
+        , file_get_contents($this->target . '/translations/foo/fr.json'));
 
         $this->assertEquals(<<<JSON
 {

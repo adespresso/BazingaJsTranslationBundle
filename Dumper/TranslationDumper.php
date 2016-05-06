@@ -205,12 +205,51 @@ class TranslationDumper
     private function getTranslations()
     {
         $translations = array();
+        $localeFallback = $this->localeFallback;
         $activeLocales = $this->activeLocales;
         $activeDomains = $this->activeDomains;
+        $files = $this->finder->all();
+
+        // Load fallback locale data
+        foreach ($files as $file) {
+            list($extension, $locale, $domain) = $this->getFileInfo($file);
+
+            if ($locale !== $localeFallback || (count($activeDomains) > 0 && !in_array($domain, $activeDomains)) ) {
+                continue;
+            }
+
+            if (!isset($translations[$locale])) {
+                $translations[$locale] = array();
+            }
+
+            if (!isset($translations[$locale][$domain])) {
+                $translations[$locale][$domain] = array();
+            }
+
+            if (isset($this->loaders[$extension])) {
+                $catalogue = $this->loaders[$extension]
+                    ->load($file, $locale, $domain);
+
+                $translations[$locale][$domain] = array_replace_recursive(
+                    $translations[$locale][$domain],
+                    $catalogue->all($domain)
+                );
+            }
+        }
+
+        // Use fallback locale data as the base for every active locale.
+        foreach ($activeLocales as $locale) {
+            if ($locale === $localeFallback) {
+                continue;
+            }
+
+            $translations[$locale] = $translations[$localeFallback];
+        }
+
         foreach ($this->finder->all() as $file) {
             list($extension, $locale, $domain) = $this->getFileInfo($file);
 
-            if ( (count($activeLocales) > 0 && !in_array($locale, $activeLocales)) || (count($activeDomains) > 0 && !in_array($domain, $activeDomains)) ) {
+            if ($locale === $localeFallback || (count($activeLocales) > 0 && !in_array($locale, $activeLocales)) || (count($activeDomains) > 0 && !in_array($domain, $activeDomains)) ) {
                 continue;
             }
 
