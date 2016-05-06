@@ -3,6 +3,7 @@
 namespace Bazinga\Bundle\JsTranslationBundle\Controller;
 
 use Bazinga\Bundle\JsTranslationBundle\Finder\TranslationFinder;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Templating\EngineInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -106,6 +107,8 @@ class Controller
 
     public function getTranslationsAction(Request $request, $domain, $_format)
     {
+        $request->setFormat('jsonp', 'application/javascript');
+
         $baseFormat = $this->getBaseFormat($_format);
         $locales = $this->getLocales($request);
 
@@ -123,6 +126,7 @@ class Controller
         if (!$cache->isFresh()) {
             $resources    = array();
             $translations = array();
+            $callback     = $baseFormat === 'jsonp' ? $this->getJsonpCallback($request) : null;
 
             foreach ($locales as $locale) {
                 $translations[$locale] = array();
@@ -156,6 +160,7 @@ class Controller
                 'defaultDomain'  => $this->defaultDomain,
                 'translations'   => $translations,
                 'include_config' => true,
+                'callback'       => $callback,
             ));
 
             try {
@@ -204,6 +209,21 @@ class Controller
         }, $locales));
 
         return $locales;
+    }
+
+    private function getJsonpCallback(Request $request)
+    {
+        $callback = $request->get('callback');
+
+        if (empty($callback)) {
+            throw new BadRequestHttpException('Please specify a JSONP callback');
+        }
+
+        if (!\JsonpCallbackValidator::validate($callback)) {
+            throw new BadRequestHttpException('Evil JSONP callback');
+        }
+
+        return $callback;
     }
 
     private function getBaseFormat($format)
