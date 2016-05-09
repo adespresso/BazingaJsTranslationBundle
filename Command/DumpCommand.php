@@ -19,6 +19,11 @@ class DumpCommand extends ContainerAwareCommand
     private $jsonpCallback;
 
     /**
+     * @var array
+     */
+    private $formats;
+
+    /**
      * {@inheritDoc}
      */
     protected function configure()
@@ -30,6 +35,12 @@ class DumpCommand extends ContainerAwareCommand
                     'target',
                     InputArgument::OPTIONAL,
                     'Override the target directory to dump JS translation files in.'
+                ),
+                new InputOption(
+                    'formats',
+                    null,
+                    InputOption::VALUE_REQUIRED,
+                    'Comma-separated list of formats to be used during dump.'
                 ),
                 new InputOption(
                     'jsonp-callback',
@@ -50,6 +61,9 @@ class DumpCommand extends ContainerAwareCommand
 
         $this->targetPath = $input->getArgument('target') ?:
             sprintf('%s/../web/js', $this->getContainer()->getParameter('kernel.root_dir'));
+
+        $formatsString = $input->getOption('formats');
+        $this->formats = empty($formatsString) ? [] : explode(',', $formatsString);
 
         $this->jsonpCallback = $input->getOption('jsonp-callback') ?: 'callback';
     }
@@ -75,6 +89,7 @@ class DumpCommand extends ContainerAwareCommand
             ->getContainer()
             ->get('bazinga.jstranslation.translation_dumper')
             ->dump($this->targetPath, [
+                'formats' => $this->formats,
                 'jsonp_callback' => $this->jsonpCallback,
             ]);
     }
