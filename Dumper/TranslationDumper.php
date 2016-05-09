@@ -123,11 +123,13 @@ class TranslationDumper
     public function dump($target = 'web/js', array $options = [])
     {
         $options      += [
+            'formats' => [],
             'jsonp_callback' => 'callback',
         ];
         $route         = $this->router->getRouteCollection()->get('bazinga_jstranslation_js');
         $requirements  = $route->getRequirements();
-        $formats       = explode('|', $requirements['_format']);
+        $supportedFormats = explode('|', $requirements['_format']);
+        $formats = empty($options['formats']) ? $supportedFormats : array_intersect($options['formats'], $supportedFormats);
 
         $routeDefaults = $route->getDefaults();
         $defaultFormat = $routeDefaults['_format'];
